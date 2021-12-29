@@ -1,0 +1,14 @@
+// Implementar restrições aos parâmetros para cada tipo de matriz
+// Implementar mais operações aritméricas com matrizes
+// Implementar matrix_from_csv
+// Implementar matrix_to_csv
+// Implementar matrix_add_row
+// Implementar matrix_add_col
+// Implementar matrix_del_row
+// Implementar matrix_del_col
+// Fazer o cálculo do determinante coincidir com as calculadoras on-line
+// Tornar o título do matrix_print opcional
+// Comentar em inglês e português
+// Tratar erros
+// Testar
+// Documentar
