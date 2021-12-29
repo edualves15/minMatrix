@@ -10,6 +10,9 @@ typedef struct {
   double **data;
 } * MinMatrix;
 
+// extern unsigned int debug_create_matrices;
+// extern unsigned int debug_destroyed_matrices;
+
 // Protótipos das funções
 MinMatrix minMatrix_from_txt(char *file_path);
 MinMatrix minMatrix_create(unsigned int rows, unsigned int cols);
@@ -24,6 +27,7 @@ MinMatrix minMatrix_cofactor(MinMatrix A);
 MinMatrix minMatrix_inverse(MinMatrix A);
 double minMatrix_determinant(MinMatrix A);
 void minMatrix_print(MinMatrix A, unsigned int decimals, char title[]);
+void minMatrix_print_properties(MinMatrix A);
 void minMatrix_destroy(MinMatrix A);
 void minMatrix_add_row(MinMatrix A);
 void minMatrix_add_col(MinMatrix A);

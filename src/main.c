@@ -5,7 +5,8 @@
 int main() {
   MinMatrix A = minMatrix_from_txt("data\\dataX.txt");
   minMatrix_print(A, 0, "MATRIX 'A' FROM .TXT FILE");
-  printf("Rows...: %u\nColumns: %u\n", A->rows, A->cols);
+
+  minMatrix_print_properties(A);
 
   MinMatrix B = minMatrix_from_txt("data\\dataY.txt");
   minMatrix_print(B, 0, "MATRIX 'B' FROM .TXT FILE");
@@ -55,9 +56,13 @@ int main() {
   minMatrix_destroy(E);
   minMatrix_destroy(F);
   minMatrix_destroy(G);
+  minMatrix_destroy(H);
   minMatrix_destroy(I);
   minMatrix_destroy(J);
   minMatrix_destroy(K);
+
+  // printf("Created matrices..: %u\n", debug_create_matrices);
+  // printf("Destroyed matrices: %u\n", debug_destroyed_matrices);
 
   return 0;
 }

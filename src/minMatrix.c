@@ -5,12 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-MinMatrix minMatrix_create(unsigned int rows, unsigned int cols) {
-  // MinMatrix A;
-  MinMatrix A = malloc(sizeof(MinMatrix) + (sizeof(double *) * (rows * cols)));
+// unsigned int debug_create_matrices = 0;
+// unsigned int debug_destroyed_matrices = 0;
 
-  // alocação da estrutura
-  // MinMatrix A = (MinMatrix)malloc(sizeof(MinMatrix));
+MinMatrix minMatrix_create(unsigned int rows, unsigned int cols) {
+  unsigned int struct_size = (sizeof(unsigned int) * 2) + sizeof(double **);
+  MinMatrix A = (MinMatrix)malloc(struct_size);
 
   A->rows = rows;
   A->cols = cols;
@@ -20,6 +20,7 @@ MinMatrix minMatrix_create(unsigned int rows, unsigned int cols) {
     A->data[i] = calloc(cols, sizeof(double));
   }
 
+  // debug_create_matrices++;
   return A;
 }
 
@@ -31,17 +32,18 @@ MinMatrix minMatrix_from_txt(char *file_path) {
     perror("Error reading file!\n");
     // exit(EXIT_FAILURE);
   }
-  fscanf(file, "%u %u", (unsigned int *)&rows, (unsigned int *)&cols);
-  MinMatrix matrix = minMatrix_create(rows, cols);
 
-  for (i = 0; i < matrix->rows; i++) {
-    for (j = 0; j < matrix->cols; j++) {
-      fscanf(file, "%lf", &matrix->data[i][j]);
+  fscanf(file, "%u %u", (unsigned int *)&rows, (unsigned int *)&cols);
+  MinMatrix A = minMatrix_create(rows, cols);
+
+  for (i = 0; i < A->rows; i++) {
+    for (j = 0; j < A->cols; j++) {
+      fscanf(file, "%lf", &A->data[i][j]);
     }
   }
 
   fclose(file);
-  return matrix;
+  return A;
 }
 
 MinMatrix minMatrix_get_col(MinMatrix A, unsigned int col) {
@@ -55,7 +57,6 @@ MinMatrix minMatrix_get_col(MinMatrix A, unsigned int col) {
 }
 
 MinMatrix minMatrix_get_last_col(MinMatrix A) {
-  puts("------------");
   MinMatrix B = minMatrix_create(A->rows, 1);
 
   for (unsigned int i = 0; i < A->rows; i++) {
@@ -67,21 +68,25 @@ MinMatrix minMatrix_get_last_col(MinMatrix A) {
 
 MinMatrix minMatrix_copy(MinMatrix A) {
   MinMatrix B = minMatrix_create(A->rows, A->cols);
+
   for (unsigned int i = 0; i < A->rows; i += 1) {
     for (unsigned int j = 0; j < A->cols; j += 1) {
       B->data[i][j] = A->data[i][j];
     }
   }
+
   return B;
 }
 
 MinMatrix minMatrix_transpose(MinMatrix A) {
   MinMatrix B = minMatrix_create(A->cols, A->rows);
+
   for (unsigned int i = 0; i < A->cols; i++) {
     for (unsigned int j = 0; j < A->rows; j++) {
       B->data[i][j] = A->data[j][i];
     }
   }
+
   return B;
 }
 
@@ -102,22 +107,24 @@ MinMatrix minMatrix_multiply(MinMatrix A, MinMatrix B) {
       }
     }
   }
+
   return C;
 }
 
 MinMatrix minMatrix_identity(unsigned int len) {
-  MinMatrix B = minMatrix_create(len, len);
+  MinMatrix A = minMatrix_create(len, len);
 
   for (unsigned int i = 0; i < len; i++) {
     for (unsigned int j = 0; j < len; j++) {
       if (i == j) {
-        B->data[i][j] = 1;
+        A->data[i][j] = 1;
       } else {
-        B->data[i][j] = 0;
+        A->data[i][j] = 0;
       }
     }
   }
-  return B;
+
+  return A;
 }
 
 MinMatrix minMatrix_get_minor(MinMatrix A, unsigned int row, unsigned int col) {
@@ -171,6 +178,7 @@ MinMatrix minMatrix_cofactor(MinMatrix A) {
     }
   }
 
+  minMatrix_destroy(B);
   return C;
 }
 
@@ -192,8 +200,9 @@ double minMatrix_determinant(MinMatrix A) {
       det += A->data[0][i] * pow(-1, i) * minMatrix_determinant(B);
       minMatrix_destroy(B);
     }
-    return det;
   }
+
+  return det;
 }
 
 // double minMatrix_determinant(MinMatrix A) {
@@ -303,25 +312,42 @@ void minMatrix_print(MinMatrix A, unsigned int decimals, char title[]) {
   putchar('\n');
 }
 
+void minMatrix_print_properties(MinMatrix A) {
+  putchar('\n');
+  puts("PROPERTIES OF MATRIX");
+  puts("--------------------");
+  unsigned int struct_size = (sizeof(unsigned int) * 2) + sizeof(double **);
+  unsigned int data_size = sizeof(double *) * (A->rows * A->cols);
+  printf("Rows...: %u\nColumns: %u\nBytes..: %u\n", A->rows, A->cols,
+         struct_size + data_size);
+  putchar('\n');
+}
+
 void minMatrix_destroy(MinMatrix A) {
   for (unsigned int i = 0; i < A->rows; i++) {
     free(A->data[i]);
   }
   free(A->data);
   free(A);
+  // debug_destroyed_matrices++;
 }
 
 void minMatrix_add_row(MinMatrix A) {
+  // A = realloc(A, sizeof(MinMatrix) + (sizeof(double *) * (A->rows *
+  // A->cols)));
   A->rows += 1;
   A->data = realloc(A->data, sizeof(double *) * (A->rows * A->cols));
   A->data[A->rows - 1] = calloc(A->cols, sizeof(double));
 }
 
 void minMatrix_add_col(MinMatrix A) {
+  // A = realloc(A, sizeof(MinMatrix) + (sizeof(double *) * (A->rows *
+  // A->cols)));
   A->cols += 1;
   A->data = realloc(A->data, sizeof(double *) * (A->rows * A->cols));
   for (unsigned int i = 0; i < A->rows; i++) {
-    A->data[i] = realloc(A->data[i], sizeof(double *) * (A->rows * A->cols));
+    A->data[i] = realloc(A->data[i], sizeof(double *) * A->cols);
+    // A->data[i] = realloc(A->data[i], sizeof(double *) * (A->rows * A->cols));
     A->data[i][A->cols - 1] = 0;
   }
 }
