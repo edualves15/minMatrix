@@ -6,7 +6,10 @@
 // Implementar matrix_add_col
 // Implementar matrix_del_row
 // Implementar matrix_del_col
+// Testar performances de implementações diferentes
 // Fazer o cálculo do determinante coincidir com as calculadoras on-line
+// Corrigir matriz identidade [ok]
+// Corrigir multiplicação de matrizes (às vezes retorna lixo)
 // Tornar o título do matrix_print opcional
 // Comentar em inglês e português
 // Tratar erros
