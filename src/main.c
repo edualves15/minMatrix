@@ -6,10 +6,13 @@ int main() {
   MinMatrix A = minMatrix_from_txt("data\\dataX.txt");
   minMatrix_print(A, 0, "MATRIX 'A' FROM .TXT FILE");
 
-  minMatrix_print_properties(A);
-
   MinMatrix B = minMatrix_from_txt("data\\dataY.txt");
   minMatrix_print(B, 0, "MATRIX 'B' FROM .TXT FILE");
+
+  MinMatrix B2 = minMatrix_from_csv("data\\dataX.csv", 'd', ',');
+  minMatrix_print(B2, 0, "MATRIX 'B2' FROM .CSV FILE");
+
+  minMatrix_print_properties(B2);
 
   MinMatrix C = minMatrix_copy(B);
   minMatrix_print(C, 0, "MATRIX 'C' IS A COPY OF MATRIX 'B'");

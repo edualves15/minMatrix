@@ -1,5 +1,6 @@
 // Implementar restrições aos parâmetros para cada tipo de matriz
 // Implementar mais operações aritméricas com matrizes
+// Matrizes com tipos estáticos e dinâmicos
 // Implementar minMatrix_from_csv
 // Implementar minMatrix_to_csv
 // Implementar minMatrix_add_row
@@ -16,4 +17,5 @@
 // Tratar erros
 // Testar
 // Documentar
+// Palavras-chave no repositório remoto
 // Versionar

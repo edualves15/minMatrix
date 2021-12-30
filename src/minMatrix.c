@@ -9,6 +9,11 @@
 // unsigned int debug_destroyed_matrices = 0;
 
 MinMatrix minMatrix_create(unsigned int rows, unsigned int cols) {
+  if (rows == 0 || cols == 0) {
+    perror("Minimum matrix dimension must be 1x1!\n");
+    // exit(EXIT_FAILURE);
+  }
+
   unsigned int struct_size = (sizeof(unsigned int) * 2) + sizeof(double **);
   MinMatrix A = (MinMatrix)malloc(struct_size);
 
@@ -16,9 +21,8 @@ MinMatrix minMatrix_create(unsigned int rows, unsigned int cols) {
   A->cols = cols;
   A->data = malloc(sizeof(double *) * (rows * cols));
 
-  for (unsigned int i = 0; i < rows; i++) {
+  for (unsigned int i = 0; i < rows; i++)
     A->data[i] = calloc(cols, sizeof(double));
-  }
 
   // debug_create_matrices++;
   return A;
@@ -43,6 +47,67 @@ MinMatrix minMatrix_from_txt(char *file_path) {
   }
 
   fclose(file);
+  return A;
+}
+
+MinMatrix minMatrix_from_csv(char *file_path, char type, char delimiter) {
+  FILE *file = fopen(file_path, "r");
+  if (file == NULL) {
+    // Error
+  }
+  unsigned int row = 0;
+  unsigned int col = 0;
+  unsigned int openDoubleQuotes = 0;
+  unsigned int openSingleQuotes = 0;
+  unsigned int lenToken = 0;
+  char *eptr;
+  char *token = malloc(CSV_MAX_ROW_WIDHT * sizeof(char));
+  char row_buf[CSV_MAX_ROW_WIDHT];
+  MinMatrix A = minMatrix_create(1, 1);
+
+  for (row = 0; fgets(row_buf, CSV_MAX_ROW_WIDHT, file); row++) {
+    if (row_buf[0] == '\n' || row_buf[0] == '\r') continue;
+
+    // Iterates through all characters in the row
+    for (unsigned int i = 0; row_buf[i] != '\n' && row_buf[i] != '\0'; i++) {
+      // Check for open quotes
+      if (row_buf[i] == '\"') {
+        if (openDoubleQuotes == 0)
+          openDoubleQuotes = 1;
+        else
+          openDoubleQuotes = 0;
+      } else if (row_buf[i] == '\'') {
+        if (openSingleQuotes == 0)
+          openSingleQuotes = 1;
+        else
+          openSingleQuotes = 0;
+      }
+
+      // Use character that is not a delimiter or is enclosed in quotation marks
+      if (row_buf[i] != delimiter || openDoubleQuotes == 1 ||
+          openSingleQuotes == 1) {
+        token[lenToken] = row_buf[i];
+        lenToken++;
+      } else {
+        token[lenToken] = '\0';
+        if (strlen(token) > 0) {
+          if (row == 0)
+            minMatrix_add_col(A);  // add all columns at first row
+          else if (col == 0)
+            minMatrix_add_row(A);  // add new row every new row
+          if (type == 'd') A->data[row][col] = strtod(token, &eptr);
+        }
+        lenToken = 0;
+        col++;
+      }
+    }
+    token[lenToken] = '\0';
+    if (strlen(token) > 0)
+      if (type == 'd') A->data[row][col] = strtod(token, &eptr);
+    lenToken = 0;
+    col = 0;
+  }
+
   return A;
 }
 
@@ -347,13 +412,15 @@ void minMatrix_add_col(MinMatrix A) {
   A->data = realloc(A->data, sizeof(double *) * (A->rows * A->cols));
   for (unsigned int i = 0; i < A->rows; i++) {
     A->data[i] = realloc(A->data[i], sizeof(double *) * A->cols);
-    // A->data[i] = realloc(A->data[i], sizeof(double *) * (A->rows * A->cols));
+    // A->data[i] = realloc(A->data[i], sizeof(double *) * (A->rows *
+    // A->cols));
     A->data[i][A->cols - 1] = 0;
   }
 }
 
 /*Function to carry out row operations*/
-// void row_operation(MinMatrix multiplier_matrix, MinMatrix matrix, int pivot,
+// void row_operation(MinMatrix multiplier_matrix, MinMatrix matrix, int
+// pivot,
 //                    unsigned int row_index) {
 //   double multiplier =
 //       (matrix->data[row_index][pivot] / matrix->data[pivot][pivot]);
@@ -378,8 +445,8 @@ void minMatrix_add_col(MinMatrix A) {
 // }
 
 /*
- This function checks if there is a line containing too many zero's and it exits
- if such a line is found
+ This function checks if there is a line containing too many zero's and it
+ exits if such a line is found
 */
 // void error_zeros(MinMatrix matrix, unsigned int control_index) {
 //   unsigned int count;

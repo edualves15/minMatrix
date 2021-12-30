@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#define CSV_MAX_ROW_WIDHT 1024
+
 // Declarações de estruturas
 typedef struct {
   unsigned int rows;
@@ -14,8 +16,9 @@ typedef struct {
 // extern unsigned int debug_destroyed_matrices;
 
 // Protótipos das funções
-MinMatrix minMatrix_from_txt(char *file_path);
 MinMatrix minMatrix_create(unsigned int rows, unsigned int cols);
+MinMatrix minMatrix_from_txt(char *file_path);
+MinMatrix minMatrix_from_csv(char *file_path, char type, char delimiter);
 MinMatrix minMatrix_copy(MinMatrix A);
 MinMatrix minMatrix_get_col(MinMatrix A, unsigned int col);
 MinMatrix minMatrix_get_last_col(MinMatrix A);
