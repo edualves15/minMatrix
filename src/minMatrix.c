@@ -5,13 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-// unsigned int debug_create_matrices = 0;
+// unsigned int debug_created_matrices = 0;
 // unsigned int debug_destroyed_matrices = 0;
 
 MinMatrix minMatrix_create(unsigned int rows, unsigned int cols) {
   if (rows == 0 || cols == 0) {
-    perror("Minimum matrix dimension must be 1x1!\n");
-    // exit(EXIT_FAILURE);
+    puts("Error creating matrix!: Minimum dimension must be 1x1");
+    exit(EXIT_FAILURE);
   }
 
   unsigned int struct_size = (sizeof(unsigned int) * 2) + sizeof(double **);
@@ -24,19 +24,17 @@ MinMatrix minMatrix_create(unsigned int rows, unsigned int cols) {
   for (unsigned int i = 0; i < rows; i++)
     A->data[i] = calloc(cols, sizeof(double));
 
-  // debug_create_matrices++;
+  // debug_created_matrices++;
   return A;
 }
 
 MinMatrix minMatrix_from_txt(char *file_path) {
-  unsigned int i, j, rows, cols;
   FILE *file = fopen(file_path, "r");
-
   if (file == NULL) {
-    perror("Error reading file!\n");
-    // exit(EXIT_FAILURE);
+    perror("Error reading file!");
+    exit(EXIT_FAILURE);
   }
-
+  unsigned int i, j, rows, cols;
   fscanf(file, "%u %u", (unsigned int *)&rows, (unsigned int *)&cols);
   MinMatrix A = minMatrix_create(rows, cols);
 
@@ -53,7 +51,8 @@ MinMatrix minMatrix_from_txt(char *file_path) {
 MinMatrix minMatrix_from_csv(char *file_path, char type, char delimiter) {
   FILE *file = fopen(file_path, "r");
   if (file == NULL) {
-    // Error
+    perror("Error reading file!");
+    exit(EXIT_FAILURE);
   }
   unsigned int row = 0;
   unsigned int col = 0;
@@ -101,6 +100,7 @@ MinMatrix minMatrix_from_csv(char *file_path, char type, char delimiter) {
         col++;
       }
     }
+
     token[lenToken] = '\0';
     if (strlen(token) > 0)
       if (type == 'd') A->data[row][col] = strtod(token, &eptr);
@@ -111,12 +111,41 @@ MinMatrix minMatrix_from_csv(char *file_path, char type, char delimiter) {
   return A;
 }
 
+MinMatrix minMatrix_get_row(MinMatrix A, unsigned int row) {
+  if (row > A->rows) {
+    puts(
+        "Error getting row!: the requested row does not exist in the "
+        "matrix");
+    exit(EXIT_FAILURE);
+  }
+
+  MinMatrix B = minMatrix_create(1, A->cols);
+
+  for (unsigned int i = 0; i < A->cols; i++) B->data[0][i] = A->data[row][i];
+
+  return B;
+}
+
+MinMatrix minMatrix_get_last_row(MinMatrix A) {
+  MinMatrix B = minMatrix_create(1, A->cols);
+
+  for (unsigned int i = 0; i < A->rows; i++)
+    B->data[0][i] = A->data[A->rows - 1][i];
+
+  return B;
+}
+
 MinMatrix minMatrix_get_col(MinMatrix A, unsigned int col) {
+  if (col > A->cols) {
+    puts(
+        "Error getting column!: the requested column does not exist in the "
+        "matrix");
+    exit(EXIT_FAILURE);
+  }
+
   MinMatrix B = minMatrix_create(A->rows, 1);
 
-  for (unsigned int i = 0; i < A->rows; i++) {
-    B->data[i][0] = A->data[i][col];
-  }
+  for (unsigned int i = 0; i < A->rows; i++) B->data[i][0] = A->data[i][col];
 
   return B;
 }
@@ -124,9 +153,8 @@ MinMatrix minMatrix_get_col(MinMatrix A, unsigned int col) {
 MinMatrix minMatrix_get_last_col(MinMatrix A) {
   MinMatrix B = minMatrix_create(A->rows, 1);
 
-  for (unsigned int i = 0; i < A->rows; i++) {
+  for (unsigned int i = 0; i < A->rows; i++)
     B->data[i][0] = A->data[i][A->cols - 1];
-  }
 
   return B;
 }
@@ -134,11 +162,8 @@ MinMatrix minMatrix_get_last_col(MinMatrix A) {
 MinMatrix minMatrix_copy(MinMatrix A) {
   MinMatrix B = minMatrix_create(A->rows, A->cols);
 
-  for (unsigned int i = 0; i < A->rows; i += 1) {
-    for (unsigned int j = 0; j < A->cols; j += 1) {
-      B->data[i][j] = A->data[i][j];
-    }
-  }
+  for (unsigned int i = 0; i < A->rows; i += 1)
+    for (unsigned int j = 0; j < A->cols; j += 1) B->data[i][j] = A->data[i][j];
 
   return B;
 }
@@ -146,168 +171,145 @@ MinMatrix minMatrix_copy(MinMatrix A) {
 MinMatrix minMatrix_transpose(MinMatrix A) {
   MinMatrix B = minMatrix_create(A->cols, A->rows);
 
-  for (unsigned int i = 0; i < A->cols; i++) {
-    for (unsigned int j = 0; j < A->rows; j++) {
-      B->data[i][j] = A->data[j][i];
-    }
-  }
+  for (unsigned int i = 0; i < A->cols; i++)
+    for (unsigned int j = 0; j < A->rows; j++) B->data[i][j] = A->data[j][i];
 
   return B;
 }
 
 MinMatrix minMatrix_multiply(MinMatrix A, MinMatrix B) {
   if (A->cols != B->rows) {
-    perror(
-        "The number of columns in the first matrix must equal the number of "
-        "rows in the second matrix.!\n");
-    // exit(EXIT_FAILURE);
+    puts(
+        "Matrix multiplication error!: The number of columns in matrix 'A' "
+        "must equal the number of rows in matrix'B'");
+    exit(EXIT_FAILURE);
   }
 
   MinMatrix C = minMatrix_create(A->rows, B->cols);
 
-  for (unsigned int i = 0; i < A->rows; i++) {
-    for (unsigned int j = 0; j < B->cols; j++) {
-      for (unsigned int k = 0; k < B->rows; k++) {
+  for (unsigned int i = 0; i < A->rows; i++)
+    for (unsigned int j = 0; j < B->cols; j++)
+      for (unsigned int k = 0; k < B->rows; k++)
         C->data[i][j] += A->data[i][k] * B->data[k][j];
-      }
-    }
-  }
 
   return C;
 }
 
 MinMatrix minMatrix_identity(unsigned int len) {
+  if (len <= 0) {
+    puts("Error creating identity matrix!: Matrix must have dimension > 0");
+    exit(EXIT_FAILURE);
+  }
+
   MinMatrix A = minMatrix_create(len, len);
 
-  for (unsigned int i = 0; i < len; i++) {
-    for (unsigned int j = 0; j < len; j++) {
-      if (i == j) {
+  for (unsigned int i = 0; i < len; i++)
+    for (unsigned int j = 0; j < len; j++)
+      if (i == j)
         A->data[i][j] = 1;
-      } else {
+      else
         A->data[i][j] = 0;
-      }
-    }
-  }
 
   return A;
 }
 
-MinMatrix minMatrix_get_minor(MinMatrix A, unsigned int row, unsigned int col) {
-  unsigned int k = 0, l = 0;
-  MinMatrix B = minMatrix_create(A->rows - 1, A->rows - 1);
+MinMatrix minMatrix_minor(MinMatrix A, unsigned int row, unsigned int col) {
+  unsigned int i, j, k, l;
+  MinMatrix minor = minMatrix_create(A->rows - 1, A->rows - 1);
 
-  for (unsigned int i = 0; i < A->rows; i++) {
-    for (unsigned int j = 0; j < A->rows; j++) {
-      if (i != row && j != col) {
-        B->data[k][l] = A->data[i][j];
-        l++;
-      }
+  for (i = 0, k = 0; i < A->rows; i++)
+    if (i != row) {
+      for (j = 0, l = 0; j < A->rows; j++)
+        if (j != col) {
+          minor->data[k][l] = A->data[i][j];
+          l++;
+        }
+      k++;
     }
-    if (i != row) k++;
-    l = 0;
-  }
 
-  return B;
+  // for (i = 0, k = 0; i < A->rows; i++) {
+  //   for (j = 0, l = 0; j < A->rows; j++)
+  //     if (i != row && j != col) {
+  //       minor->data[k][l] = A->data[i][j];
+  //       l++;
+  //     }
+  //   if (i != row) k++;
+  // }
+
+  return minor;
 }
 
 MinMatrix minMatrix_cofactor(MinMatrix A) {
-  MinMatrix B = minMatrix_create(A->rows - 1, A->rows - 1);
-  MinMatrix C = minMatrix_create(A->rows, A->rows);
-  unsigned int i, j, ii, jj;
+  MinMatrix minor = minMatrix_create(A->rows - 1, A->rows - 1);
+  MinMatrix cof = minMatrix_create(A->rows, A->rows);
+  unsigned int row, col, i, j, k, l;
 
-  for (unsigned int row = 0; row < A->rows; row++) {
-    for (unsigned int col = 0; col < A->rows; col++) {
-      for (ii = 0, i = 0; i < A->rows;) {
+  for (row = 0; row < A->rows; row++) {
+    for (col = 0; col < A->rows; col++) {
+      // Calculating the minors in line
+      // is faster than calling the function.
+      for (i = 0, k = 0; i < A->rows; i++)
         if (i != row) {
-          for (jj = 0, j = 0; j < A->rows;) {
+          for (j = 0, l = 0; j < A->rows; j++)
             if (j != col) {
-              B->data[ii][jj] = A->data[i][j];
-              j++;
-              jj++;
-            } else {
-              j++;
+              minor->data[k][l] = A->data[i][j];
+              l++;
             }
-          }
-          i++;
-          ii++;
-        } else {
-          i++;
+          k++;
         }
-      }
-      if (((row % 2 == 0) && (col % 2 == 0)) ||
-          ((row % 2 != 0) && (col % 2 != 0)))
-        C->data[row][col] = minMatrix_determinant(B);
-      else {
-        C->data[row][col] = -1 * minMatrix_determinant(B);
-      }
+      if ((row + col) % 2 == 0)
+        cof->data[row][col] = minMatrix_determinant(minor);
+      else
+        cof->data[row][col] = -1 * minMatrix_determinant(minor);
+
+      // if ((row + col) % 2 == 0)
+      //   cof->data[row][col] =
+      //       minMatrix_determinant(minMatrix_minor(A, row, col));
+      // else
+      //   cof->data[row][col] =
+      //       -1 * minMatrix_determinant(minMatrix_minor(A, row, col));
     }
   }
 
-  minMatrix_destroy(B);
-  return C;
+  minMatrix_destroy(minor);
+  return cof;
 }
 
 double minMatrix_determinant(MinMatrix A) {
   if (A->cols != A->rows) {
-    perror("Non square matrix!\n");
-    // exit(EXIT_FAILURE);
+    puts("Error calculating the determinant!: Non square matrix");
+    exit(EXIT_FAILURE);
   }
 
+  if (A->rows == 1) return A->data[0][0];
+
+  if (A->rows == 2)
+    return A->data[0][0] * A->data[1][1] - A->data[0][1] * A->data[1][0];
+
+  MinMatrix minor = minMatrix_create(A->rows - 1, A->cols - 1);
+  unsigned int col, k, l, i, j;
   double det = 0;
 
-  if (A->rows == 1) {
-    return A->data[0][0];
-  } else if (A->rows == 2) {
-    return (A->data[0][0] * A->data[1][1] - A->data[0][1] * A->data[1][0]);
-  } else {
-    for (unsigned int i = 0; i < A->rows; i++) {
-      MinMatrix B = minMatrix_get_minor(A, 0, i);
-      det += A->data[0][i] * pow(-1, i) * minMatrix_determinant(B);
-      minMatrix_destroy(B);
-    }
+  for (col = 0; col < A->rows; col++) {
+    for (k = 0, i = 0; i < A->rows; i++)
+      if (i != 0) {
+        for (l = 0, j = 0; j < A->rows; j++)
+          if (j != col) {
+            minor->data[k][l] = A->data[i][j];
+            l++;
+          }
+        k++;
+      }
+
+    if (col % 2 == 0)
+      det += A->data[0][col] * minMatrix_determinant(minor);
+    else
+      det += (-1 * A->data[0][col]) * minMatrix_determinant(minor);
   }
 
+  minMatrix_destroy(minor);
   return det;
 }
-
-// double minMatrix_determinant(MinMatrix A) {
-//   MinMatrix B = minMatrix_create(A->rows - 1, A->cols - 1);
-//   double det = 0;
-
-//   if (A->rows == 1) {
-//     return A->data[0][0];
-//   } else if (A->rows == 2) {
-//     return A->data[0][0] * A->data[1][1] - A->data[0][1] * A->data[1][0];
-//   } else {
-//     for (unsigned int i = 0; i < A->rows; i++) {
-//       for (unsigned int ii = 0, j = 0; j < A->rows;) {
-//         if (j != 0) {
-//           for (unsigned int jj = 0, k = 0; k < A->rows;) {
-//             if (k != i) {
-//               B->data[ii][jj] = A->data[j][k];
-//               k++;
-//               jj++;
-//             } else {
-//               k++;
-//             }
-//           }
-//           j++;
-//           ii++;
-//         } else {
-//           j++;
-//         }
-//       }
-//       if (i % 2 == 0) {
-//         det += A->data[0][i] * minMatrix_determinant(B);
-//       } else {
-//         det += (-1 * A->data[0][i]) * minMatrix_determinant(B);
-//       }
-//     }
-
-//     minMatrix_destroy(B);
-//     return det;
-//   }
-// }
 
 // MinMatrix minMatrix_inverse(MinMatrix A) {
 //   MinMatrix B = minMatrix_create(A->cols, A->cols);
@@ -323,7 +325,7 @@ double minMatrix_determinant(MinMatrix A) {
 
 //   for (unsigned int i = 0; i < A->cols; i++) {
 //     for (unsigned int j = 0; j < A->cols; j++) {
-//       MinMatrix C = minMatrix_get_minor(A, i, j);
+//       MinMatrix C = minMatrix_minor(A, i, j);
 //       B->data[i][j] = (pow(-1, i + j) * minMatrix_determinant(C)) / det;
 //       minMatrix_destroy(C);
 //     }
@@ -344,18 +346,18 @@ MinMatrix minMatrix_inverse(MinMatrix A) {
 
   MinMatrix cof = minMatrix_cofactor(A);     // cofactor matrix
   MinMatrix adj = minMatrix_transpose(cof);  // adjoint matrix
-  MinMatrix B = minMatrix_create(A->rows, A->cols);
+  MinMatrix inv = minMatrix_create(A->rows, A->cols);
   double det = minMatrix_determinant(A);
 
   for (unsigned int i = 0; i < A->rows; i++) {
     for (unsigned int j = 0; j < A->rows; j++) {
-      B->data[i][j] = adj->data[i][j] / det;
+      inv->data[i][j] = adj->data[i][j] / det;
     }
   }
 
   minMatrix_destroy(cof);
   minMatrix_destroy(adj);
-  return B;
+  return inv;
 }
 
 void minMatrix_print(MinMatrix A, unsigned int decimals, char title[]) {

@@ -1,6 +1,11 @@
 #include <stdio.h>
+#include <time.h>
 
 #include "minMatrix.h"
+
+clock_t time_begin;
+clock_t time_end;
+unsigned long iter_benck = 1000000;
 
 int main() {
   MinMatrix A = minMatrix_from_txt("data\\dataX.txt");
@@ -8,6 +13,9 @@ int main() {
 
   MinMatrix B = minMatrix_from_txt("data\\dataY.txt");
   minMatrix_print(B, 0, "MATRIX 'B' FROM .TXT FILE");
+
+  // MinMatrix B1 = minMatrix_create(0, 0);
+  // minMatrix_print(B1, 0, "CREATE A MATRIX");
 
   MinMatrix B2 = minMatrix_from_csv("data\\dataX.csv", 'd', ',');
   minMatrix_print(B2, 0, "MATRIX 'B2' FROM .CSV FILE");
@@ -32,19 +40,57 @@ int main() {
   MinMatrix H = minMatrix_transpose(A);
   minMatrix_print(H, 0, "MATRIX 'A' TRANSPOSED");
 
-  MinMatrix I = minMatrix_get_minor(A, 0, 0);
+  //////////////////////////////////////////////////////////////////////////////
+  MinMatrix I;
+  time_begin = clock();
+  for (size_t i = 0; i < iter_benck; i++) {
+    I = minMatrix_minor(A, 0, 0);
+  }
+  time_end = clock();
+  printf("\n>> Tempo p/ calcular um menor...........: %lf <<\n",
+         (double)(time_end - time_begin) / CLOCKS_PER_SEC);
+  //////////////////////////////////////////////////////////////////////////////
+  double det;
+  time_begin = clock();
+  for (size_t i = 0; i < iter_benck; i++) {
+    det = minMatrix_determinant(A);
+  }
+  time_end = clock();
+  printf(">> Tempo p/ calcular o determinante.....: %lf <<\n",
+         (double)(time_end - time_begin) / CLOCKS_PER_SEC);
+  //////////////////////////////////////////////////////////////////////////////
+  MinMatrix K;
+  time_begin = clock();
+  for (size_t i = 0; i < iter_benck; i++) {
+    K = minMatrix_cofactor(A);
+  }
+  time_end = clock();
+  printf(">> Tempo p/ calcular o cofator..........: %lf <<\n",
+         (double)(time_end - time_begin) / CLOCKS_PER_SEC);
+  //////////////////////////////////////////////////////////////////////////////
+  // MinMatrix J;
+  // time_begin = clock();
+  // for (size_t i = 0; i < iter_benck; i++) {
+  //   J = minMatrix_inverse(A);
+  // }
+  // time_end = clock();
+  // printf(">> Tempo p/ calcular o inverso da matriz: %lf <<\n\n",
+  //        (double)(time_end - time_begin) / CLOCKS_PER_SEC);
+  //////////////////////////////////////////////////////////////////////////////
+
+  // MinMatrix I = minMatrix_minor(A, 0, 0);
   minMatrix_print(I, 0, "MINOR MATRIX FROM MATRIX 'A' AT ROW 0 AND COLUMN 0");
 
-  double det = minMatrix_determinant(A);
+  // double det = minMatrix_determinant(A);
   puts("\nDETERMINANT OF MATRIX 'A'");
   puts("-------------------------");
   printf("%.0lf\n\n", det);
 
+  // MinMatrix K = minMatrix_cofactor(A);
+  minMatrix_print(K, 0, "COFACTOR OF MATRIX 'A'");
+
   MinMatrix J = minMatrix_inverse(A);
   minMatrix_print(J, 15, "INVERSE OF MATRIX 'A'");
-
-  MinMatrix K = minMatrix_cofactor(A);
-  minMatrix_print(K, 0, "COFACTOR OF MATRIX 'A'");
 
   minMatrix_add_row(A);
   minMatrix_print(A, 0, "ADD ROW TO MATRIX 'A'");
