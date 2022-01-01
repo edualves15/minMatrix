@@ -5,9 +5,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+// criar função que verifica se os dados importados são do tipo numérico
+
 // unsigned int debug_created_matrices = 0;
 // unsigned int debug_destroyed_matrices = 0;
 
+/*
+ * Function: minMatrix_create
+ * --------------------------
+ * Aloca a memória necessária para a estrutura da matriz e preenche
+ * todos os campos com zeros.
+ *
+ * rows: número de linhas da matriz
+ * cols: número de colunas da matriz
+ *
+ * retorno: a matriz criada
+ */
 MinMatrix minMatrix_create(unsigned int rows, unsigned int cols) {
   if (rows == 0 || cols == 0) {
     puts("Error creating matrix!: Minimum dimension must be 1x1");
@@ -28,6 +41,16 @@ MinMatrix minMatrix_create(unsigned int rows, unsigned int cols) {
   return A;
 }
 
+/*
+ * Function: minMatrix_from_txt
+ * ----------------------------
+ * Cria uma matriz e importa os dados de um arquivo de texto
+ * caso estes dados sejam numéricos.
+ *
+ * file_path: endereço do arquivo
+ *
+ * retorno: matriz contendo os dados do arquivo de texto
+ */
 MinMatrix minMatrix_from_txt(char *file_path) {
   FILE *file = fopen(file_path, "r");
   if (file == NULL) {
@@ -48,7 +71,19 @@ MinMatrix minMatrix_from_txt(char *file_path) {
   return A;
 }
 
-MinMatrix minMatrix_from_csv(char *file_path, char type, char delimiter) {
+/*
+ * Function: minMatrix_from_txt
+ * ----------------------------
+ * Cria uma matriz e importa os dados de um arquivo .csv
+ * caso estes dados sejam numéricos. Números entra aspas
+ * também são aceitos.
+ *
+ * file_path: endereço do arquivo
+ * delimiter: delimitador do .csv
+ *
+ * retorno: matriz contendo os dados do arquivo .csv
+ */
+MinMatrix minMatrix_from_csv(char *file_path, char delimiter) {
   FILE *file = fopen(file_path, "r");
   if (file == NULL) {
     perror("Error reading file!");
@@ -94,7 +129,7 @@ MinMatrix minMatrix_from_csv(char *file_path, char type, char delimiter) {
             minMatrix_add_col(A);  // add all columns at first row
           else if (col == 0)
             minMatrix_add_row(A);  // add new row every new row
-          if (type == 'd') A->data[row][col] = strtod(token, &eptr);
+          A->data[row][col] = strtod(token, &eptr);
         }
         lenToken = 0;
         col++;
@@ -102,15 +137,25 @@ MinMatrix minMatrix_from_csv(char *file_path, char type, char delimiter) {
     }
 
     token[lenToken] = '\0';
-    if (strlen(token) > 0)
-      if (type == 'd') A->data[row][col] = strtod(token, &eptr);
+    if (strlen(token) > 0) A->data[row][col] = strtod(token, &eptr);
     lenToken = 0;
     col = 0;
   }
 
+  free(token);
   return A;
 }
 
+/*
+ * Function: minMatrix_get_row
+ * ---------------------------
+ * Copia uma linha específica de uma matriz
+ *
+ * A: matriz de entrada
+ * row: a linha especificada
+ *
+ * retorno: matriz contendo apenas a linha especificada
+ */
 MinMatrix minMatrix_get_row(MinMatrix A, unsigned int row) {
   if (row > A->rows) {
     puts(
@@ -126,6 +171,15 @@ MinMatrix minMatrix_get_row(MinMatrix A, unsigned int row) {
   return B;
 }
 
+/*
+ * Function: minMatrix_get_last_row
+ * --------------------------------
+ * Copia a última linha de uma matriz
+ *
+ * A: matriz de entrada
+ *
+ * retorno: matriz contendo a última linha da matriz de entrada
+ */
 MinMatrix minMatrix_get_last_row(MinMatrix A) {
   MinMatrix B = minMatrix_create(1, A->cols);
 
@@ -135,6 +189,16 @@ MinMatrix minMatrix_get_last_row(MinMatrix A) {
   return B;
 }
 
+/*
+ * Function: minMatrix_get_col
+ * ---------------------------
+ * Copia uma coluna específica de uma matriz
+ *
+ * A: matriz de entrada
+ * row: a coluna especificada
+ *
+ * retorno: matriz contendo apenas a coluna especificada
+ */
 MinMatrix minMatrix_get_col(MinMatrix A, unsigned int col) {
   if (col > A->cols) {
     puts(
@@ -150,6 +214,15 @@ MinMatrix minMatrix_get_col(MinMatrix A, unsigned int col) {
   return B;
 }
 
+/*
+ * Function: minMatrix_get_last_col
+ * --------------------------------
+ * Copia a última coluna de uma matriz
+ *
+ * A: matriz de entrada
+ *
+ * retorno: matriz contendo a última coluna da matriz de entrada
+ */
 MinMatrix minMatrix_get_last_col(MinMatrix A) {
   MinMatrix B = minMatrix_create(A->rows, 1);
 
@@ -159,6 +232,15 @@ MinMatrix minMatrix_get_last_col(MinMatrix A) {
   return B;
 }
 
+/*
+ * Function: minMatrix_copy
+ * ------------------------
+ * Copia uma matriz para nova matriz
+ *
+ * A: matriz de entrada
+ *
+ * retorno: cópia da matriz de entrada
+ */
 MinMatrix minMatrix_copy(MinMatrix A) {
   MinMatrix B = minMatrix_create(A->rows, A->cols);
 
@@ -168,6 +250,15 @@ MinMatrix minMatrix_copy(MinMatrix A) {
   return B;
 }
 
+/*
+ * Function: minMatrix_transpose
+ * -----------------------------
+ * Cria nova matriz trocando linhas por colunas da matriz de entrada.
+ *
+ * A: matriz de entrada
+ *
+ * retorno: matriz transposta
+ */
 MinMatrix minMatrix_transpose(MinMatrix A) {
   MinMatrix B = minMatrix_create(A->cols, A->rows);
 
@@ -177,6 +268,19 @@ MinMatrix minMatrix_transpose(MinMatrix A) {
   return B;
 }
 
+/*
+ * Function: minMatrix_multiply
+ * ----------------------------
+ * Multiplica duas matrizes quando o número de colunas da primeira matriz é
+ * igual ao número de linhas da segunda matriz. No caso da multiplicação de
+ * matrizes a ordem dos fatores altera o produto, portanto, A*B ≠ B*A. Este
+ * algoritmo usa o método intuitivo (padrão) de multiplicação de matrizes
+ *
+ * A: matriz 1
+ * A: matriz 2
+ *
+ * retorno: matriz com o produto das duas matrizes de entrada
+ */
 MinMatrix minMatrix_multiply(MinMatrix A, MinMatrix B) {
   if (A->cols != B->rows) {
     puts(
@@ -195,6 +299,37 @@ MinMatrix minMatrix_multiply(MinMatrix A, MinMatrix B) {
   return C;
 }
 
+/*
+ * Function: minMatrix_multiply_by_number
+ * --------------------------------------
+ * Multiplica uma matriz por um número. Cada elemento da matriz é multiplicado
+ * pelo número especificado
+ *
+ * A: matriz de entrada
+ * number: multiplicador
+ *
+ * retorno: matriz com o produto da matrize de entrada e o número
+ */
+MinMatrix minMatrix_multiply_by_number(MinMatrix A, double number) {
+  MinMatrix C = minMatrix_create(A->rows, A->cols);
+
+  for (unsigned int i = 0; i < A->rows; i++)
+    for (unsigned int j = 0; j < A->cols; j++)
+      C->data[i][j] = A->data[i][j] * number;
+
+  return C;
+}
+
+/*
+ * Function: minMatrix_identity
+ * ----------------------------
+ * Cria uma matriz diagonal, cujos elementos da diagonal principal
+ * são todos iguais a 1.
+ *
+ * len: dimensão da matriz a ser criada (ordem da matriz)
+ *
+ * retorno: matriz identidade
+ */
 MinMatrix minMatrix_identity(unsigned int len) {
   if (len <= 0) {
     puts("Error creating identity matrix!: Matrix must have dimension > 0");
@@ -205,15 +340,29 @@ MinMatrix minMatrix_identity(unsigned int len) {
 
   for (unsigned int i = 0; i < len; i++)
     for (unsigned int j = 0; j < len; j++)
-      if (i == j)
-        A->data[i][j] = 1;
-      else
-        A->data[i][j] = 0;
+      if (i == j) A->data[i][j] = 1;
+  // else
+  //   A->data[i][j] = 0;
 
   return A;
 }
 
+/*
+ * Function: minMatrix_minor
+ * -------------------------
+ * Cria uma matriz de menores obtida pela remoção
+ * de uma linha e uma coluna da matriz de entrada.
+ *
+ * row: linha a ser removida
+ * col: coluna a ser removida
+ *
+ * retorno: matriz de menores
+ */
 MinMatrix minMatrix_minor(MinMatrix A, unsigned int row, unsigned int col) {
+  if (A->cols != A->rows) {
+    puts("Error calculating minors!: Non square matrix");
+    exit(EXIT_FAILURE);
+  }
   unsigned int i, j, k, l;
   MinMatrix minor = minMatrix_create(A->rows - 1, A->rows - 1);
 
@@ -227,27 +376,35 @@ MinMatrix minMatrix_minor(MinMatrix A, unsigned int row, unsigned int col) {
       k++;
     }
 
-  // for (i = 0, k = 0; i < A->rows; i++) {
-  //   for (j = 0, l = 0; j < A->rows; j++)
-  //     if (i != row && j != col) {
-  //       minor->data[k][l] = A->data[i][j];
-  //       l++;
-  //     }
-  //   if (i != row) k++;
-  // }
-
   return minor;
 }
 
+/*
+ * Function: minMatrix_cofactor
+ * ----------------------------
+ * Cria uma matriz de cofatores a partir de uma matriz de entrada.
+ * O cofator de cada elemento é o determinante da matriz de menores,
+ * que por sua vez é obtida a partir da matriz de entrada. O sinal do
+ * cofator deve ser invertido nas posições ímpares da matriz (-1)
+ *
+ * A: Matriz de entrada
+ *
+ * retorno: matriz de cofatores
+ */
 MinMatrix minMatrix_cofactor(MinMatrix A) {
+  if (A->cols != A->rows) {
+    puts("Error calculating cofactor!: Non square matrix");
+    exit(EXIT_FAILURE);
+  }
+
   MinMatrix minor = minMatrix_create(A->rows - 1, A->rows - 1);
   MinMatrix cof = minMatrix_create(A->rows, A->rows);
   unsigned int row, col, i, j, k, l;
 
   for (row = 0; row < A->rows; row++) {
     for (col = 0; col < A->rows; col++) {
-      // Calculating the minors in line is faster than calling the function
-      // minMatrix_minor().
+      // Calculate minors inline
+      // This is 30% faster than calling the function
       for (i = 0, k = 0; i < A->rows; i++)
         if (i != row) {
           for (j = 0, l = 0; j < A->rows; j++)
@@ -257,11 +414,13 @@ MinMatrix minMatrix_cofactor(MinMatrix A) {
             }
           k++;
         }
+      // Inverts the sign if the sum of the positions in each dimension is odd
       if ((row + col) % 2 == 0)
         cof->data[row][col] = minMatrix_determinant(minor);
       else
         cof->data[row][col] = -1 * minMatrix_determinant(minor);
 
+      // Calculate minors with function call every iteration
       // if ((row + col) % 2 == 0)
       //   cof->data[row][col] =
       //       minMatrix_determinant(minMatrix_minor(A, row, col));
@@ -277,7 +436,7 @@ MinMatrix minMatrix_cofactor(MinMatrix A) {
 
 double minMatrix_determinant(MinMatrix A) {
   if (A->cols != A->rows) {
-    puts("Error calculating the determinant!: Non square matrix");
+    puts("Error calculating determinant!: Non square matrix");
     exit(EXIT_FAILURE);
   }
 
@@ -287,7 +446,7 @@ double minMatrix_determinant(MinMatrix A) {
     return A->data[0][0] * A->data[1][1] - A->data[0][1] * A->data[1][0];
 
   MinMatrix minor = minMatrix_create(A->rows - 1, A->cols - 1);
-  unsigned int col, k, l, i, j;
+  unsigned int col, i, j, k, l;
   double det = 0;
 
   for (col = 0; col < A->rows; col++) {

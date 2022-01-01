@@ -18,7 +18,7 @@ typedef struct {
 // Protótipos das funções
 MinMatrix minMatrix_create(unsigned int rows, unsigned int cols);
 MinMatrix minMatrix_from_txt(char *file_path);
-MinMatrix minMatrix_from_csv(char *file_path, char type, char delimiter);
+MinMatrix minMatrix_from_csv(char *file_path, char delimiter);
 MinMatrix minMatrix_copy(MinMatrix A);
 MinMatrix minMatrix_get_row(MinMatrix A, unsigned int col);
 MinMatrix minMatrix_get_last_row(MinMatrix A);
@@ -27,6 +27,7 @@ MinMatrix minMatrix_get_last_col(MinMatrix A);
 MinMatrix minMatrix_transpose(MinMatrix A);
 MinMatrix minMatrix_identity(unsigned int len);
 MinMatrix minMatrix_multiply(MinMatrix A, MinMatrix B);
+MinMatrix minMatrix_multiply_by_number(MinMatrix A, double number);
 MinMatrix minMatrix_minor(MinMatrix A, unsigned int row, unsigned int col);
 MinMatrix minMatrix_cofactor(MinMatrix A);
 MinMatrix minMatrix_inverse(MinMatrix A);
