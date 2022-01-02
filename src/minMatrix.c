@@ -54,7 +54,7 @@ MinMatrix minMatrix_create(unsigned int rows, unsigned int cols) {
 MinMatrix minMatrix_from_txt(char *file_path) {
   FILE *file = fopen(file_path, "r");
   if (file == NULL) {
-    perror("Error reading file!");
+    perror("Error reading text file!");
     exit(EXIT_FAILURE);
   }
   unsigned int i, j, rows, cols;
@@ -79,11 +79,13 @@ MinMatrix minMatrix_from_txt(char *file_path) {
  * também são aceitos.
  *
  * file_path: endereço do arquivo
- * delimiter: delimitador do .csv
+ * delimiter: caracter que separa os elementos
+ * has_header: indica se há um header na primeira linha do arquivo .csv
  *
  * retorno: matriz contendo os dados do arquivo .csv
  */
-MinMatrix minMatrix_from_csv(char *file_path, char delimiter) {
+MinMatrix minMatrix_from_csv(char *file_path, char delimiter,
+                             unsigned int has_header) {
   FILE *file = fopen(file_path, "r");
   if (file == NULL) {
     perror("Error reading file!");
@@ -99,8 +101,15 @@ MinMatrix minMatrix_from_csv(char *file_path, char delimiter) {
   char row_buf[CSV_MAX_ROW_WIDHT];
   MinMatrix A = minMatrix_create(1, 1);
 
-  for (row = 0; fgets(row_buf, CSV_MAX_ROW_WIDHT, file); row++) {
-    if (row_buf[0] == '\n' || row_buf[0] == '\r') continue;
+  while (fgets(row_buf, CSV_MAX_ROW_WIDHT, file)) {
+    if (row == 0 && has_header) {
+      has_header = 0;
+      continue;
+    }
+
+    if (row_buf[0] == '\n' || row_buf[0] == '\r') {
+      continue;
+    }
 
     // Iterates through all characters in the row
     for (unsigned int i = 0; row_buf[i] != '\n' && row_buf[i] != '\0'; i++) {
@@ -140,6 +149,7 @@ MinMatrix minMatrix_from_csv(char *file_path, char delimiter) {
     if (strlen(token) > 0) A->data[row][col] = strtod(token, &eptr);
     lenToken = 0;
     col = 0;
+    row++;
   }
 
   free(token);
@@ -248,6 +258,21 @@ MinMatrix minMatrix_copy(MinMatrix A) {
     for (unsigned int j = 0; j < A->cols; j += 1) B->data[i][j] = A->data[i][j];
 
   return B;
+}
+
+void minMatrix_add_row(MinMatrix A) {
+  A->rows += 1;
+  A->data = realloc(A->data, sizeof(double *) * (A->rows * A->cols));
+  A->data[A->rows - 1] = calloc(A->cols, sizeof(double));
+}
+
+void minMatrix_add_col(MinMatrix A) {
+  A->cols += 1;
+  A->data = realloc(A->data, sizeof(double *) * (A->rows * A->cols));
+  for (unsigned int i = 0; i < A->rows; i++) {
+    A->data[i] = realloc(A->data[i], sizeof(double *) * A->cols);
+    A->data[i][A->cols - 1] = 0;
+  }
 }
 
 /*
@@ -434,6 +459,15 @@ MinMatrix minMatrix_cofactor(MinMatrix A) {
   return cof;
 }
 
+/*
+ * Function: minMatrix_determinant
+ * -------------------------------
+ * Calcula o determinante transformando uma matriz de entrada em um escalar
+ *
+ * A: Matriz de entrada
+ *
+ * retorno: determinante (double)
+ */
 double minMatrix_determinant(MinMatrix A) {
   if (A->cols != A->rows) {
     puts("Error calculating determinant!: Non square matrix");
@@ -470,8 +504,16 @@ double minMatrix_determinant(MinMatrix A) {
   return det;
 }
 
-// INVERSE OF MATRIX USING THE ADJUGATE METHOD
-// MATRIZ INVERSA COM O MÉTODO DA INVERSÃO POR MATRIZ ADJUNTA
+/*
+ * Function: minMatrix_inverse
+ * ---------------------------
+ * Cria uma matriz inversa da matriz de entrada.
+ * Esta função usa o método da inversão por matriz adjunta.
+ *
+ * A: Matriz de entrada
+ *
+ * retorno: matriz inversa
+ */
 MinMatrix minMatrix_inverse(MinMatrix A) {
   if (A->cols != A->rows) {
     puts("Error calculating matrix inverse!: Non square matrix");
@@ -499,6 +541,15 @@ MinMatrix minMatrix_inverse(MinMatrix A) {
   return inv;
 }
 
+/*
+ * Function: minMatrix_print
+ * -------------------------
+ * Imprime uma matriz na saída padrão.
+ *
+ * A: Matriz de entrada
+ * decimals: Número de casas decimais dos elementos a serem impressos
+ * title: Título que será impresso com a matriz
+ */
 void minMatrix_print(MinMatrix A, unsigned int decimals, char title[]) {
   unsigned int len_title = strlen(title);
 
@@ -518,6 +569,16 @@ void minMatrix_print(MinMatrix A, unsigned int decimals, char title[]) {
   putchar('\n');
 }
 
+/*
+ * Function: minMatrix_print_properties
+ * ------------------------------------
+ * Imprime os atributos de uma matriz:
+ * - Número de linhas;
+ * - Número de colunas;
+ * - Tamanho em bytes.
+ *
+ * A: Matriz de entrada
+ */
 void minMatrix_print_properties(MinMatrix A) {
   putchar('\n');
   puts("PROPERTIES OF MATRIX");
@@ -529,6 +590,11 @@ void minMatrix_print_properties(MinMatrix A) {
   putchar('\n');
 }
 
+/*
+ * Function: minMatrix_destroy
+ * ---------------------------
+ * Desaloca os endereços usados pela matriz (arrays e estruturas):
+ */
 void minMatrix_destroy(MinMatrix A) {
   for (unsigned int i = 0; i < A->rows; i++) {
     free(A->data[i]);
@@ -536,19 +602,4 @@ void minMatrix_destroy(MinMatrix A) {
   free(A->data);
   free(A);
   // debug_destroyed_matrices++;
-}
-
-void minMatrix_add_row(MinMatrix A) {
-  A->rows += 1;
-  A->data = realloc(A->data, sizeof(double *) * (A->rows * A->cols));
-  A->data[A->rows - 1] = calloc(A->cols, sizeof(double));
-}
-
-void minMatrix_add_col(MinMatrix A) {
-  A->cols += 1;
-  A->data = realloc(A->data, sizeof(double *) * (A->rows * A->cols));
-  for (unsigned int i = 0; i < A->rows; i++) {
-    A->data[i] = realloc(A->data[i], sizeof(double *) * A->cols);
-    A->data[i][A->cols - 1] = 0;
-  }
 }

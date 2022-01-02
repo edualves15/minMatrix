@@ -3,10 +3,6 @@
 
 #include "minMatrix.h"
 
-clock_t time_begin;
-clock_t time_end;
-unsigned long iter_benck = 100000;
-
 int main() {
   MinMatrix A = minMatrix_from_txt("data\\dataX.txt");
   minMatrix_print(A, 0, "MATRIX 'A' FROM .TXT FILE");
@@ -14,7 +10,7 @@ int main() {
   MinMatrix B = minMatrix_from_txt("data\\dataY.txt");
   minMatrix_print(B, 0, "MATRIX 'B' FROM .TXT FILE");
 
-  MinMatrix B2 = minMatrix_from_csv("data\\dataX.csv", ',');
+  MinMatrix B2 = minMatrix_from_csv("data\\dataX.csv", ',', 0);
   minMatrix_print(B2, 0, "MATRIX 'B2' FROM .CSV FILE");
 
   minMatrix_print_properties(B2);
@@ -57,39 +53,16 @@ int main() {
   minMatrix_add_col(B);
   minMatrix_print(B, 0, "ADD COLUMN TO MATRIX 'B'");
 
-  //////////////////////////////////////////////////////////////////////////////
-  // time_begin = clock();
-  // for (size_t i = 0; i < iter_benck; i++) {
-  //   I = minMatrix_minor(A, 0, 0);
-  // }
-  // time_end = clock();
-  // printf("\n>> Tempo p/ calcular o menor............: %lf <<\n",
-  //        (double)(time_end - time_begin) / CLOCKS_PER_SEC);
-  //////////////////////////////////////////////////////////////////////////////
-  // time_begin = clock();
-  // for (size_t i = 0; i < iter_benck; i++) {
-  //   det = minMatrix_determinant(A);
-  // }
-  // time_end = clock();
-  // printf(">> Tempo p/ calcular o determinante.....: %lf <<\n",
-  //        (double)(time_end - time_begin) / CLOCKS_PER_SEC);
-  //////////////////////////////////////////////////////////////////////////////
-  // time_begin = clock();
-  // for (size_t i = 0; i < iter_benck; i++) {
-  //   K = minMatrix_cofactor(A);
-  // }
-  // time_end = clock();
-  // printf(">> Tempo p/ calcular o cofator..........: %lf <<\n",
-  //        (double)(time_end - time_begin) / CLOCKS_PER_SEC);
-  //////////////////////////////////////////////////////////////////////////////
-  time_begin = clock();
+  /************************* Benchmark *************************/
+  unsigned int iter_benck = 100000;
+  clock_t time_begin = clock();
   for (size_t i = 0; i < iter_benck; i++) {
     J = minMatrix_inverse(A);
   }
-  time_end = clock();
-  printf(">> Tempo p/ calcular o inverso da matriz: %lf <<\n\n",
+  clock_t time_end = clock();
+  printf(">> Time to compute %ux the inverse matrix: %lfs <<\n\n", iter_benck,
          (double)(time_end - time_begin) / CLOCKS_PER_SEC);
-  //////////////////////////////////////////////////////////////////////////////
+  /*************************************************************/
 
   minMatrix_destroy(A);
   minMatrix_destroy(B);
@@ -104,8 +77,8 @@ int main() {
   minMatrix_destroy(J);
   minMatrix_destroy(K);
 
-  // printf("Created matrices..: %u\n", debug_create_matrices);
-  // printf("Destroyed matrices: %u\n", debug_destroyed_matrices);
+  // printf("Number of created matrices..: %u\n", debug_created_matrices);
+  // printf("Number of Destroyed matrices: %u\n", debug_destroyed_matrices);
 
   return 0;
 }

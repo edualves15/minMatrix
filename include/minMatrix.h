@@ -12,13 +12,14 @@ typedef struct {
   double **data;
 } * MinMatrix;
 
-// extern unsigned int debug_create_matrices;
+// extern unsigned int debug_created_matrices;
 // extern unsigned int debug_destroyed_matrices;
 
 // Protótipos das funções
 MinMatrix minMatrix_create(unsigned int rows, unsigned int cols);
 MinMatrix minMatrix_from_txt(char *file_path);
-MinMatrix minMatrix_from_csv(char *file_path, char delimiter);
+MinMatrix minMatrix_from_csv(char *file_path, char delimiter,
+                             unsigned int has_header);
 MinMatrix minMatrix_copy(MinMatrix A);
 MinMatrix minMatrix_get_row(MinMatrix A, unsigned int col);
 MinMatrix minMatrix_get_last_row(MinMatrix A);
@@ -37,11 +38,5 @@ void minMatrix_print_properties(MinMatrix A);
 void minMatrix_destroy(MinMatrix A);
 void minMatrix_add_row(MinMatrix A);
 void minMatrix_add_col(MinMatrix A);
-
-// void row_operation(MinMatrix multiplier_matrix, MinMatrix matrix, int pivot,
-//                    unsigned int row_index);
-// void row_divide(MinMatrix matrix, int pivot);
-// void error_zeros(MinMatrix matrix, unsigned int control_index);
-// void minMatrix_row_reduce(MinMatrix matrix, unsigned int zero_control);
 
 #endif
