@@ -1,11 +1,21 @@
+/*
+File name
+Author
+Origin date
+Module version number
+Compiler version used to compile the code
+The intended target
+Copyright information
+Miscellaneous notes
+Revision information
+*/
+
 #include "minMatrix.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-// criar função que verifica se os dados importados são do tipo numérico
 
 // unsigned int debug_created_matrices = 0;
 // unsigned int debug_destroyed_matrices = 0;
@@ -42,14 +52,11 @@ MinMatrix minMatrix_create(unsigned int rows, unsigned int cols) {
 }
 
 /*
- * Function: minMatrix_from_txt
- * ----------------------------
- * Cria uma matriz e importa os dados de um arquivo de texto
- * caso estes dados sejam numéricos.
+ * Create a matrix from tabular numeric data in a text file.
  *
- * file_path: endereço do arquivo
+ * @param {file_path} text file path
  *
- * retorno: matriz contendo os dados do arquivo de texto
+ * @returns Matrix containing text file data
  */
 MinMatrix minMatrix_from_txt(char *file_path) {
   FILE *file = fopen(file_path, "r");
@@ -72,17 +79,14 @@ MinMatrix minMatrix_from_txt(char *file_path) {
 }
 
 /*
- * Function: minMatrix_from_txt
- * ----------------------------
- * Cria uma matriz e importa os dados de um arquivo .csv
- * caso estes dados sejam numéricos. Números entra aspas
- * também são aceitos.
+ * Creates a matrix and imports data from a .csv file if this data is numeric.
+ * Numbers in quotes are also accepted.
  *
- * file_path: endereço do arquivo
- * delimiter: caracter que separa os elementos
- * has_header: indica se há um header na primeira linha do arquivo .csv
+ * @param {file_path} endereço do arquivo
+ * @param {delimiter} caracter que separa os elementos
+ * @param {has_header} indica se há um header na primeira linha do arquivo .csv
  *
- * retorno: matriz contendo os dados do arquivo .csv
+ * @returns Matrix containing .csv file data
  */
 MinMatrix minMatrix_from_csv(char *file_path, char delimiter,
                              unsigned int has_header) {
@@ -276,21 +280,55 @@ void minMatrix_add_col(MinMatrix A) {
 }
 
 /*
- * Function: minMatrix_transpose
- * -----------------------------
- * Cria nova matriz trocando linhas por colunas da matriz de entrada.
+ * Function: minMatrix_sum
+ * -----------------------
+ * Soma duas matrizes com dimensões iguais
  *
- * A: matriz de entrada
+ * A: matriz 1
+ * B: matriz 2
  *
- * retorno: matriz transposta
+ * retorno: matriz com a soma das duas matrizes de entrada
  */
-MinMatrix minMatrix_transpose(MinMatrix A) {
-  MinMatrix B = minMatrix_create(A->cols, A->rows);
+MinMatrix minMatrix_sum(MinMatrix A, MinMatrix B) {
+  if (A->rows != B->rows || A->cols != B->cols) {
+    puts(
+        "Error adding matrices!: Matrices must have equal number of rows and "
+        "columns");
+    exit(EXIT_FAILURE);
+  }
 
-  for (unsigned int i = 0; i < A->cols; i++)
-    for (unsigned int j = 0; j < A->rows; j++) B->data[i][j] = A->data[j][i];
+  MinMatrix sum = minMatrix_create(A->rows, A->cols);
+  for (unsigned int i = 0; i < A->rows; i++)
+    for (unsigned int j = 0; j < A->cols; j++)
+      sum->data[i][j] = A->data[i][j] + B->data[i][j];
 
-  return B;
+  return sum;
+}
+
+/*
+ * Function: minMatrix_diff
+ * ------------------------
+ * Diferença entre duas matrizes
+ *
+ * A: matriz 1
+ * B: matriz 2
+ *
+ * retorno: matriz com a diferença entre as duas matrizes de entrada
+ */
+MinMatrix minMatrix_diff(MinMatrix A, MinMatrix B) {
+  if (A->rows != B->rows || A->cols != B->cols) {
+    puts(
+        "error subtracting matrices!: Matrices must have equal number of rows "
+        "and columns");
+    exit(EXIT_FAILURE);
+  }
+
+  MinMatrix diff = minMatrix_create(A->rows, A->cols);
+  for (unsigned int i = 0; i < A->rows; i++)
+    for (unsigned int j = 0; j < A->cols; j++)
+      diff->data[i][j] = A->data[i][j] - B->data[i][j];
+
+  return diff;
 }
 
 /*
@@ -302,7 +340,7 @@ MinMatrix minMatrix_transpose(MinMatrix A) {
  * algoritmo usa o método intuitivo (padrão) de multiplicação de matrizes
  *
  * A: matriz 1
- * A: matriz 2
+ * B: matriz 2
  *
  * retorno: matriz com o produto das duas matrizes de entrada
  */
@@ -314,14 +352,14 @@ MinMatrix minMatrix_multiply(MinMatrix A, MinMatrix B) {
     exit(EXIT_FAILURE);
   }
 
-  MinMatrix C = minMatrix_create(A->rows, B->cols);
+  MinMatrix prod = minMatrix_create(A->rows, B->cols);
 
   for (unsigned int i = 0; i < A->rows; i++)
     for (unsigned int j = 0; j < B->cols; j++)
       for (unsigned int k = 0; k < B->rows; k++)
-        C->data[i][j] += A->data[i][k] * B->data[k][j];
+        prod->data[i][j] += A->data[i][k] * B->data[k][j];
 
-  return C;
+  return prod;
 }
 
 /*
@@ -336,13 +374,31 @@ MinMatrix minMatrix_multiply(MinMatrix A, MinMatrix B) {
  * retorno: matriz com o produto da matrize de entrada e o número
  */
 MinMatrix minMatrix_multiply_by_number(MinMatrix A, double number) {
-  MinMatrix C = minMatrix_create(A->rows, A->cols);
+  MinMatrix prod = minMatrix_create(A->rows, A->cols);
 
   for (unsigned int i = 0; i < A->rows; i++)
     for (unsigned int j = 0; j < A->cols; j++)
-      C->data[i][j] = A->data[i][j] * number;
+      prod->data[i][j] = A->data[i][j] * number;
 
-  return C;
+  return prod;
+}
+
+/*
+ * Function: minMatrix_transpose
+ * -----------------------------
+ * Cria nova matriz trocando linhas por colunas da matriz de entrada.
+ *
+ * A: matriz de entrada
+ *
+ * retorno: matriz transposta
+ */
+MinMatrix minMatrix_transpose(MinMatrix A) {
+  MinMatrix T = minMatrix_create(A->cols, A->rows);
+
+  for (unsigned int i = 0; i < A->cols; i++)
+    for (unsigned int j = 0; j < A->rows; j++) T->data[i][j] = A->data[j][i];
+
+  return T;
 }
 
 /*
@@ -361,15 +417,15 @@ MinMatrix minMatrix_identity(unsigned int len) {
     exit(EXIT_FAILURE);
   }
 
-  MinMatrix A = minMatrix_create(len, len);
+  MinMatrix I = minMatrix_create(len, len);
 
   for (unsigned int i = 0; i < len; i++)
     for (unsigned int j = 0; j < len; j++)
-      if (i == j) A->data[i][j] = 1;
+      if (i == j) I->data[i][j] = 1;
   // else
-  //   A->data[i][j] = 0;
+  //   I->data[i][j] = 0;
 
-  return A;
+  return I;
 }
 
 /*
@@ -462,7 +518,7 @@ MinMatrix minMatrix_cofactor(MinMatrix A) {
 /*
  * Function: minMatrix_determinant
  * -------------------------------
- * Calcula o determinante transformando uma matriz de entrada em um escalar
+ * Calcula o determinante fazendo uso do Teorema de Laplace
  *
  * A: Matriz de entrada
  *

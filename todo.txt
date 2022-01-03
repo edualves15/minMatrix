@@ -1,8 +1,8 @@
-// Implementar mais operações aritméricas com matrizes
 // Implementar minMatrix_to_csv
 // Implementar minMatrix_del_row
 // Implementar minMatrix_del_col
 // Implementar minMatrix_create_random(min, max)
+// criar função que verifica se os dados importados são do tipo numérico
 // Tornar o título do minMatrix_print opcional
 // Comentar em inglês e português
 // Testar

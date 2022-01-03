@@ -27,6 +27,8 @@ MinMatrix minMatrix_get_col(MinMatrix A, unsigned int col);
 MinMatrix minMatrix_get_last_col(MinMatrix A);
 MinMatrix minMatrix_transpose(MinMatrix A);
 MinMatrix minMatrix_identity(unsigned int len);
+MinMatrix minMatrix_sum(MinMatrix A, MinMatrix B);
+MinMatrix minMatrix_diff(MinMatrix A, MinMatrix B);
 MinMatrix minMatrix_multiply(MinMatrix A, MinMatrix B);
 MinMatrix minMatrix_multiply_by_number(MinMatrix A, double number);
 MinMatrix minMatrix_minor(MinMatrix A, unsigned int row, unsigned int col);
